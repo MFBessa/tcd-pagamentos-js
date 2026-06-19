@@ -1,0 +1,36 @@
+name: Pipeline de Integração Contínua
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *' # Executa automaticamente todos os dias à meia-noite
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Copiar os arquivos do repositório
+      uses: actions/checkout@v4
+
+    - name: Instalar o Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Instalar dependências
+      run: npm install
+
+    - name: Executar testes e gerar relatório
+      run: |
+        mkdir -p relatorios
+        npm test > relatorios/resultado-testes.txt
+
+    - name: Salvar o relatório na pipeline (Artefato)
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: relatorio-de-execucao
+        path: relatorios/
